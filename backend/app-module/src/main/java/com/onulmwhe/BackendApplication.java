@@ -1,4 +1,4 @@
-package com.onulmwhe.backend;
+package com.onulmwhe;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

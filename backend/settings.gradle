@@ -1,0 +1,4 @@
+rootProject.name = 'backend'
+include 'user-module'
+include 'route-module'
+include 'app-module'

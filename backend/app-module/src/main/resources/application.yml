@@ -1,0 +1,65 @@
+spring.application.name=backend
+server:
+  port: 8080
+
+spring:
+  application:
+    name: backend
+  datasource:
+    url: jdbc:postgresql://localhost:55432/today_route
+    username: app
+    password: app
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  data:
+    redis:
+      url: redis://localhost:6379
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_OAUTH_CLIENT_ID}
+            client-secret: ${KAKAO_OAUTH_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/kakao"
+            authorization-grant-type: authorization_code
+            scope: profile_nickname, account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: 86400000
+
+ai:
+  service:
+    url: http://localhost:8000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      aiService:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+  retry:
+    instances:
+      aiService:
+        maxAttempts: 2
+        waitDuration: 500ms
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  health:
+    circuitbreakers:
+      enabled: true

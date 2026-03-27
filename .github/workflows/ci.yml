@@ -8,12 +8,9 @@ on:
 jobs:
   backend-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [api-gateway, user-service, route-service]
     defaults:
       run:
-        working-directory: ${{ matrix.service }}
+        working-directory: backend
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -26,7 +23,7 @@ jobs:
         with:
           gradle-version: "8.10"
       - name: Run tests
-        run: gradle test
+        run: ./gradlew test
 
   ai-service-test:
     runs-on: ubuntu-latest

@@ -1,12 +1,8 @@
-spring.application.name=backend
-server:
-  port: 8080
-
 spring:
   application:
     name: backend
   datasource:
-    url: jdbc:postgresql://localhost:55432/today_route
+    url: jdbc:postgresql://localhost:5435/today_route
     username: app
     password: app
     driver-class-name: org.postgresql.Driver
@@ -40,7 +36,7 @@ jwt:
 
 ai:
   service:
-    url: http://localhost:8000
+    url: http://localhost:8001
 
 resilience4j:
   circuitbreaker:

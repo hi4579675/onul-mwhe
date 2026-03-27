@@ -1,0 +1,33 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Java/Gradle
+.gradle/
+build/
+out/
+
+# Logs
+*.log
+
+# Local overrides
+*.local.yml
+
+# Node / Expo
+node_modules/
+.expo/
+dist/

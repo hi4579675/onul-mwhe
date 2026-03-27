@@ -7,7 +7,17 @@ import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
+// =================================================================================
+// 실제로 파이썬 AI 서버와 대화하는 곳입니다.
+//
+// WebClient: 비동기 방식의 최신 통신 도구로 .block()을 써서 응답이 올 때까지 기다리도록 설정했습니다.
+//
+// @Retry: 일시적인 네트워크 오류 등으로 실패했을 때, 설정된 횟수만큼 자동으로 다시 시도합니다.
+//
+// @CircuitBreaker: 장애가 발생한 서버에 계속 요청을 보내서 시스템이 과부하되는 것을 막습니다.
+//
+// fallbackGenerate: 통신이 완전히 실패했을 때 대신 실행되는 비상용 메서드입니다.
+// =========================================================================================
 @Component
 public class AiServiceClient {
 

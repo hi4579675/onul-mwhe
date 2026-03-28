@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import APIRouter, Header
@@ -9,32 +10,41 @@ from app.models.schemas import (
     RouteGenerateSuccessResponse,
     TimeSlot,
 )
+from app.services.route_service import RouteService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/route", tags=["route"])
-
-
+route_service = RouteService()
+ 
+# 응답은 반드시 RouteGenerateSuccessResponse 규격을 지켜야 함
 @router.post("/generate", response_model=RouteGenerateSuccessResponse)
 async def generate_route(
-    body: RouteGenerateRequest,
-    x_correlation_id: UUID = Header(..., alias="X-Correlation-ID"),
+    body: RouteGenerateRequest, # 사용자가 보낸 데이터 (request body
+    x_correlation_id: UUID = Header(..., alias="X-Correlation-ID"), # 헤더에서 추적 ID 꺼내기
 ) -> RouteGenerateSuccessResponse:
-    # TODO: 실제 Retrieve/Feasibility/Score/LLM 파이프라인 연결
-    first_slot = body.timeslots[0] if body.timeslots else TimeSlot.lunch
-
-    sample_plan = [
-        PlanItem(
-            place_id="kakao_12345",
-            slot=first_slot,
-            order=1,
-            reason=f"{body.region}에서 취향 기반으로 우선 추천한 장소입니다.",
-            confidence=0.72,
-            ambience_tag=AmbienceTag.cozy,
+    correlation_id = str(x_correlation_id)
+    
+    try:
+        response = await route_service.generate(body, correlation_id)
+        
+        logger.info(
+            "[%s] route.generate success region=%s slots=%d fallback=%s",
+            correlation_id,
+            body.region,
+            len(body.timeslots),
+            response.fallback_used,
         )
-    ]
-
-    return RouteGenerateSuccessResponse(
-        plan=sample_plan,
-        fallback_used=False,
-        unknown_count=0,
-        correlation_id=str(x_correlation_id),
-    )
+        return response
+    
+    except Exception as e:
+        logger.exception("[%s] route.generate failed: %s", correlation_id, e)
+        return RouteGenerateSuccessResponse(
+            plan=[],
+            fallback_used=True,
+            unknown_count=0,
+            correlation_id=correlation_id,
+        )
+        
+    
+    

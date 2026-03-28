@@ -4,11 +4,8 @@ from uuid import UUID
 from fastapi import APIRouter, Header
 
 from app.models.schemas import (
-    AmbienceTag,
-    PlanItem,
     RouteGenerateRequest,
     RouteGenerateSuccessResponse,
-    TimeSlot,
 )
 from app.services.route_service import RouteService
 

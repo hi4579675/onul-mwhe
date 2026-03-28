@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     KAKAO_REST_API_KEY: str = Field(..., min_length=1)
     KAKAO_BASE_URL: str = "https://dapi.kakao.com"
     KAKAO_TIMEOUT_SECONDS: float = Field(default=3.0, gt=0)
-    MAX_CANDIDATES_PER_CATEGORY: int = Field(default=10, ge=1, le=30)
+    
   
   # 4. Claude LLM (나중에 쓸 것들 미리 준비)
     ANTHROPIC_API_KEY: str = Field(default="")
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     LLM_TIMEOUT: float = 10.0
 
     # 5. 비즈니스 로직 설정 (Scoring)
-    MAX_CANDIDATES_PER_CATEGORY: int = Field(default=15, ge=1, le=30)
+    MAX_CANDIDATES_PER_CATEGORY: int = Field(default=10, ge=1, le=30)
     CONFIDENCE_THRESHOLD: float = 0.4
 
     # 6. Redis 및 캐시 설정

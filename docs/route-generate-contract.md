@@ -5,6 +5,13 @@
 - **Last Updated**: 2026-03-27
 - **Status**: Fixed
 
+## 0. Revision History
+| Version | Date | Author | Change Type | Summary |
+| :--- | :--- | :--- | :--- | :--- |
+| v1.0.1 | 2026-03-27 | Team | Changed | request/response 필드 및 에러 코드 고정 |
+| v1.0.0 | 2026-03-27 | Team | Added | 초기 계약서 작성 |
+---
+
 ## 1. 개요
 사용자의 취향/지역 정보를 바탕으로 하루 동선을 생성하는 `ai-service`(FastAPI) 핵심 API.
 `route-service`(Spring Boot)에서 내부 호출한다.
@@ -132,3 +139,24 @@
   "correlation_id": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
+
+---
+## 5. Validation Rules (서버 동작 기준)
+- `timeslots`는 중복 불가, 최소 2개
+- `preferred_ambience`는 최소 1개, 최대 4개
+- `budget_level`은 `low/normal/high`만 허용
+- `X-Correlation-ID` 누락 시 `422` 반환
+- JSON body 누락/형식 오류 시 `422` 반환
+---
+## 6. Fallback Semantics
+- `fallback_used=true` 조건:
+  - 외부 API 타임아웃
+  - 상위 의존 서비스 일시 장애
+  - 내부 추천 파이프라인에서 후보가 0개
+- fallback 응답이어도 계약 스키마는 동일하게 유지한다.
+- fallback 응답 시 `plan`은 빈 배열일 수 있다.
+---
+## 7. Non-Goals (현재 버전에서 하지 않는 것)
+- LLM이 후보 외 장소를 생성하는 기능
+- 실시간 교통/혼잡도 기반 동선 최적화
+- 개인화 모델 학습 결과의 온라인 반영

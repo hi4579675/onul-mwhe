@@ -82,3 +82,29 @@
 - **Consequences**
   - 장점: 프론트/백엔드/AI 병렬 개발 가능
   - 단점: 계약 변경 시 하위 서비스 동시 수정 필요
+
+## ADR-005: Retrieve에 Redis Cache-Aside 도입
+
+- **Date**: 2026-03-27
+- **Status**: Accepted
+- **Context**
+  - Kakao API 호출 빈도가 높아질수록 응답 지연/쿼터 소모가 증가함
+- **Decision**
+  - `place:candidates:v1:{region}:{slot}` 키로 후보 조회 결과를 TTL 캐시한다
+- **Consequences**
+  - 장점: 응답시간 단축, 외부 API 호출량 감소
+  - 단점: TTL 구간 내 데이터 최신성 지연 가능
+
+---
+
+## ADR-006: Confidence를 Score와 분리 계산
+
+- **Date**: 2026-03-27
+- **Status**: Accepted
+- **Context**
+  - 점수(final_score)와 설명 신뢰도(confidence)를 같은 값으로 두면 해석력이 떨어짐
+- **Decision**
+  - confidence는 evidence 개수/질 기반으로 별도 계산한다
+- **Consequences**
+  - 장점: 추천 이유의 신뢰도를 독립적으로 표현 가능
+  - 단점: 계산 규칙 복잡도 증가, 튜닝 포인트 추가

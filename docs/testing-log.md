@@ -125,3 +125,24 @@
 
 - **비고**
   - score와 confidence 분리 반영 후 계약 응답 일관성 확인
+
+  ## 2026-03-29 (외부 API 복원력 적용)
+
+- **환경**
+  - Service: `ai-service`
+  - Command: `pytest -q`
+
+- **테스트 항목**
+  - [x] Kakao timeout 발생 시 retry 2회 동작
+  - [x] 연속 실패 시 circuit breaker open 동작
+  - [x] 후보 수집 실패 시 상위 fallback 경로(`fallback_used=true`) 확인
+
+- **결과**
+  - Passed:
+    - retry/circuit breaker 단위 테스트 통과
+    - route fallback 경로 검증 통과
+  - Failed:
+    - 없음
+
+- **비고**
+  - 장애 유형 로그 분류 필드(timeout/network/http_4xx/http_5xx/circuit_open) 적용

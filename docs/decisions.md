@@ -122,3 +122,20 @@
 - **Consequences**
   - 장점: 응답 예측 가능성 향상, UX 일관성 강화, 운영 추적성 개선
   - 단점: 슬롯별 후보가 부족하면 `plan` 길이가 줄어들 수 있음
+
+## ADR-009: 외부 API 복원력 정책 (Kakao)
+
+- **Date**: 2026-03-29
+- **Status**: Accepted
+- **Context**
+  - Kakao API의 순간 타임아웃/네트워크 오류가 추천 실패로 직접 전파될 수 있음.
+  - 연속 실패 시 동일 외부 API를 계속 두드리면 지연/실패가 증폭될 수 있음.
+- **Decision**
+  - Kakao 호출에 `tenacity` 기반 재시도 정책을 적용한다.
+    - 최대 시도: 2회
+    - 대기: 지수 백오프(min/max 설정값 사용)
+  - `aiobreaker` circuit breaker를 적용해 연속 실패 시 일정 시간 호출을 차단한다.
+  - 오류를 `timeout/network/http_4xx/http_5xx/circuit_open`으로 분류해 구조화 로그로 남긴다.
+- **Consequences**
+  - 장점: 순간 장애 흡수, 연쇄 장애 완화, 장애 원인 분석 속도 향상
+  - 단점: 설정값 관리 포인트 증가, 재시도로 인한 소폭 지연 가능

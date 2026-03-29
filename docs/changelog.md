@@ -32,6 +32,10 @@
 - 동일 `place_id` 중복 선택을 차단해 한 응답 내 장소 중복 추천을 방지함.
 - 슬롯 선택 실패를 `dropped_slots` 내부 로그로 표준화해 운영 시 원인 추적성을 강화함.
 
+- Kakao 외부 호출에 retry(최대 2회, 지수 백오프)와 circuit breaker를 적용해 장애 전파를 완화함.
+- Kakao 호출 실패 로그를 timeout/network/http_4xx/http_5xx/circuit_open 분류 필드로 표준화함.
+- 외부 API 복원력 설정값(retry/cb/timeout)을 환경설정으로 분리해 운영 튜닝 가능성을 높임.
+
 ### Fixed
 - 테스트 실행 경로/모듈 import 이슈를 정리하고 회귀 테스트를 보강했다.
 - `score_service`에서 confidence 계산값이 응답에 반영되지 않던 문제 수정

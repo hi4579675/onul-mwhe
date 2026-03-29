@@ -171,3 +171,8 @@
   - Feasibility 적용 후 후보가 0개
   - Score 적용 후 선택 가능한 후보가 0개
   - 외부 의존성 오류/타임아웃
+  - Slot ordering rule: `plan`은 요청 `timeslots`의 순서를 그대로 따른다.
+  - Slot fill rule: 각 슬롯에서 최대 1개 장소만 선택한다.
+  - Place de-dup rule: 동일 `place_id`는 하나의 응답에서 중복 선택하지 않는다.
+  - Partial plan rule: 슬롯별 유효 후보가 없으면 해당 슬롯은 비워둘 수 있으며, 전체 응답은 실패가 아닌 부분 성공으로 처리한다.
+  - Dropped slots handling: 선택 실패 슬롯은 내부 `dropped_slots` 로그로 기록하며 API 응답 본문에는 노출하지 않는다.

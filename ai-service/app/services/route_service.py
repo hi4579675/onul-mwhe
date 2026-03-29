@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from app.models.schemas import AmbienceTag, PlanItem, RouteGenerateRequest, RouteGenerateSuccessResponse
+import logging
+
+from app.models.schemas import AmbienceTag, PlanItem, RouteGenerateRequest,RouteGenerateSuccessResponse,TimeSlot 
+from app.models.schemas import TimeSlot
 from app.services.feasibility_service import FeasibilityService
 from app.services.retrieve_service import RetrieveService
-from app.services.score_service import ScoreService
+from app.services.score_service import ScoreService, ScoredCandidate
 
+logger = logging.getLogger(__name__)
 
 class RouteService:
     def __init__(self) -> None:
@@ -18,7 +22,7 @@ class RouteService:
          # 2. 실현 가능성 필터 적용
         feasible = self.feasibility_service.apply(candidates, body.timeslots)
 
-        # 3. 실현 가능성 필터 결과가 없으면 빈 응답 반환
+        # 실현 가능성 필터 결과가 없으면 빈 응답 반환
         if not feasible:
             return RouteGenerateSuccessResponse(
                 plan=[],
@@ -27,7 +31,7 @@ class RouteService:
                 correlation_id=correlation_id,
             )
             
-        # 4.  MVP 임시 로직: 첫 후보 1개 선택
+         # 3. 점수화
         scored = self.score_service.score(feasible, body.preferred_ambience)
         if not scored:
             return RouteGenerateSuccessResponse(
@@ -36,44 +40,70 @@ class RouteService:
                 unknown_count=0,
                 correlation_id=correlation_id,
             )
+            
+        # 4. 슬롯 기준 버킷 구성 + 슬롯 내부 점수 내림차순 정렬
+        by_slot: dict[TimeSlot, list[ScoredCandidate]] = {}
+        for item in scored:
+            by_slot.setdefault(item.candidate.slot, []).append(item)
+        for slot_items in by_slot.values():
+            slot_items.sort(key=lambda x: x.final_score, reverse=True)
+
+        # 5. 핵심 규칙:
+        #    - 요청 body.timeslots 순서대로 1개씩 뽑기
+        #    - place_id 중복 금지
         selected: list[PlanItem] = []
-        used_slots: set[str] = set()
+        used_place_ids: set[str] = set()
+        dropped_slots: list[str] = []
         
-        for item in sorted(scored, key=lambda x: x.final_score, reverse=True):
-            slot_value = item.candidate.slot.value
-            if slot_value in used_slots:
+        for slot in body.timeslots:
+            slot_items = by_slot.get(slot, [])
+            picked: ScoredCandidate | None = None
+            for item in slot_items:
+                if item.candidate.place_id in used_place_ids:
+                    continue
+                picked = item
+                break
+
+            if picked is None:
+                # 슬롯 채우기 실패는 내부 로깅용으로 누적
+                dropped_slots.append(slot.value)
                 continue
-            used_slots.add(slot_value)
+            used_place_ids.add(picked.candidate.place_id)
             selected.append(
                 PlanItem(
-                    place_id=item.candidate.place_id,
-                    slot=item.candidate.slot,
+                    place_id=picked.candidate.place_id,
+                    slot=picked.candidate.slot,
                     order=len(selected) + 1,
                     reason=(
-                        f"{body.region} {slot_value} 추천, "
-                        f"이동 {item.candidate.travel_minutes}분, "
-                        f"체류 {item.candidate.stay_minutes}분, "
-                        f"feasibility 페널티 {item.candidate.penalty_score:+.2f}"
+                        f"{body.region} {picked.candidate.slot.value} 추천, "
+                        f"이동 {picked.candidate.travel_minutes}분, "
+                        f"체류 {picked.candidate.stay_minutes}분, "
+                        f"feasibility 페널티 {picked.candidate.penalty_score:+.2f}"
                     ),
-                    confidence=item.confidence,
-                    ambience_tag=item.ambience_tag,
+                    confidence=picked.confidence,
+                    ambience_tag=picked.ambience_tag,
                 )
+            )        
+        if dropped_slots:
+            logger.info(
+                "[%s] route.generate dropped_slots=%s requested=%s selected_count=%d",
+                correlation_id,
+                dropped_slots,
+                [s.value for s in body.timeslots],
+                len(selected),
+            )
+        if not selected:
+            return RouteGenerateSuccessResponse(
+                plan=[],
+                fallback_used=True,
+                unknown_count=0,
+                correlation_id=correlation_id,
             )
 
-            if len(selected) >= len(body.timeslots):
-                    break
-        if not selected:
-          return RouteGenerateSuccessResponse(
-              plan=[],
-              fallback_used=True,
-              unknown_count=0,
-              correlation_id=correlation_id,
-          )
-        unknown_count = sum(1 for p in selected if p.ambience_tag.value == "unknown")
+        unknown_count = sum(1 for p in selected if p.ambience_tag == AmbienceTag.unknown)
         return RouteGenerateSuccessResponse(
             plan=selected,
             fallback_used=False,
             unknown_count=unknown_count,
             correlation_id=correlation_id,
         )
-       

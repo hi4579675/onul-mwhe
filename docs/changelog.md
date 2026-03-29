@@ -18,12 +18,20 @@
 - Feasibility 단계에 영업시간 판정(`open/closed/unknown`) 로직을 추가했다.
 - Score 단계에 evidence 기반 `ambience_tag` 추정 및 `confidence` 계산을 추가했다.
 
+- feasibility business-hours 파싱 단위 테스트 추가
+- retrieve cache hit/miss 단위 테스트 추가
+- score confidence 분리 검증 테스트 추가
+
+
+
 ### Changed
 - Route 조합 로직을 슬롯 중복 제거 방식으로 변경해 슬롯당 최대 1개 추천되도록 했다.
 - fallback 조건을 retrieve/feasibility/score 결과 기반으로 명확화했다.
 
 ### Fixed
 - 테스트 실행 경로/모듈 import 이슈를 정리하고 회귀 테스트를 보강했다.
+- `score_service`에서 confidence 계산값이 응답에 반영되지 않던 문제 수정
+- `feasibility_service` 중복 함수 정의 및 불필요 import 정리
 
 ### Removed
 - 

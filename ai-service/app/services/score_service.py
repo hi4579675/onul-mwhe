@@ -63,7 +63,7 @@ class ScoreService:
                 ScoredCandidate(
                     candidate=c,
                     final_score=final_score,
-                    confidence=final_score,  # MVP에서는 score와 동일하게 시작
+                    confidence=confidence,
                     ambience_tag=inferred_tag,
                 )
             )

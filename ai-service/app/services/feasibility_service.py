@@ -210,11 +210,7 @@ class FeasibilityService:
             return start_m <= target <= end_m
         return target >= start_m or target <= end_m
     
-    @staticmethod
-    def _estimate_travel_minutes(lat1: float, lng1: float, lat2: float, lng2: float) -> int:
-        km = _haversine_km(lat1, lng1, lat2, lng2)
-        minutes = (km / 20.0) * 60.0
-        return max(1, int(round(minutes)))
+    
     
     @staticmethod
     def _estimate_travel_minutes(lat1: float, lng1: float, lat2: float, lng2: float) -> int:

@@ -67,7 +67,7 @@
   - ai-service 직접 호출 정상(200)
   - route-service 경유 시 계약 응답 확인
   - pytest 통과 (`route/retrieve/score`)
-  
+
 ## 2026-03-27
 
 - **환경**
@@ -111,3 +111,17 @@
 
 - **비고**
   - 슬롯 중복 제거 로직 반영 후 `plan` 구성이 요청 슬롯 수 이하로 유지됨
+
+
+  ## 2026-03-27 (stabilization)
+
+- **환경**
+  - Service: `ai-service`
+  - Command: `pytest -q`
+
+- **결과**
+  - score/retrieve/route + feasibility 테스트 통과
+  - confidence/캐시/영업시간 회귀 테스트 추가
+
+- **비고**
+  - score와 confidence 분리 반영 후 계약 응답 일관성 확인

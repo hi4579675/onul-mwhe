@@ -176,3 +176,11 @@
   - Place de-dup rule: 동일 `place_id`는 하나의 응답에서 중복 선택하지 않는다.
   - Partial plan rule: 슬롯별 유효 후보가 없으면 해당 슬롯은 비워둘 수 있으며, 전체 응답은 실패가 아닌 부분 성공으로 처리한다.
   - Dropped slots handling: 선택 실패 슬롯은 내부 `dropped_slots` 로그로 기록하며 API 응답 본문에는 노출하지 않는다.
+
+### Cache Policy (Retrieve)
+
+- Key: `place:candidates:v1:{region}:{slot}`
+- TTL: 기본 `3600s`, 저장 시 `±15% jitter` 적용
+- Read policy: cache-aside (hit 시 Kakao 호출 생략)
+- Stampede control: 동일 key miss 동시 요청은 single-flight로 외부 호출 1회만 수행
+- Cache failure: Redis read/write 실패 시 soft-fail (외부 호출로 폴백)

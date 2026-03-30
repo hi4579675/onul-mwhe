@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
+import random
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -11,7 +13,6 @@ from app.core.config import get_settings
 from app.models.schemas import TimeSlot
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass # 자바의 @Date나 class
 class CandidatePlace:

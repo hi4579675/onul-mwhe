@@ -42,6 +42,11 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     TTL_CANDIDATES: int = 3600
     
+    # LLM rerank toggle / runtime
+    ENABLE_LLM_RERANK: bool = False
+    LLM_RERANK_MODEL: str = "claude-3-5-sonnet-20241022"
+    LLM_RERANK_TIMEOUT_SECONDS: float = Field(default=2.0, gt=0)
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()

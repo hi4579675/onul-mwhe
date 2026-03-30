@@ -184,3 +184,11 @@
 - Read policy: cache-aside (hit 시 Kakao 호출 생략)
 - Stampede control: 동일 key miss 동시 요청은 single-flight로 외부 호출 1회만 수행
 - Cache failure: Redis read/write 실패 시 soft-fail (외부 호출로 폴백)
+
+### Rerank Behavior (Feature Flag)
+
+- 기본값: `ENABLE_LLM_RERANK=false`
+- `false`: 기존 score 기반 선택 로직만 사용
+- `true`: 슬롯별 후보에 대해 rerank를 적용하고 `reason`을 보강
+- 안전장치: rerank 단계에서 `place_id`는 후보 allowlist 검증을 통과한 항목만 반영
+- 응답 계약: rerank on/off와 무관하게 응답 스키마(`plan`, `fallback_used`, `unknown_count`, `correlation_id`)는 동일

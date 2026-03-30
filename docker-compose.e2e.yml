@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: today-route-postgres-v3
+    environment:
+      POSTGRES_DB: today_route
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: today-route-redis-v3
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  ai-service:
+    build: ./ai-service
+    container_name: today-route-ai-v3
+    ports:
+      - "8005:8001"
+    env_file:
+    - ./ai-service/.env
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+
+  backend:
+    build: ./backend
+    container_name: today-route-backend-v3
+    ports:
+      - "8083:8082"   # 핵심: 공존용 포트
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/today_route
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: app
+      SPRING_DATA_REDIS_URL: redis://redis:6379
+      AI_SERVICE_URL: http://ai-service:8001
+    depends_on:
+      - postgres
+      - redis
+      - ai-service
+
+volumes:
+  postgres_data:
+  redis_data:

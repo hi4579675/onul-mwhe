@@ -1,13 +1,14 @@
 # 📍 API Contract: Route Generation
 
 - **File Path**: `docs/route-generate-contract.md`
-- **Version**: v1.0.1
-- **Last Updated**: 2026-03-27
+- **Version**: v1.1.0
+- **Last Updated**: 2026-03-30
 - **Status**: Fixed
 
 ## 0. Revision History
 | Version | Date | Author | Change Type | Summary |
 | :--- | :--- | :--- | :--- | :--- |
+| v1.1.0 | 2026-03-30 | Team | Changed | today-context 입력(companion/activity) + 고정 프로필(allergies/vegan) 반영, food_type 제거 |
 | v1.0.1 | 2026-03-27 | Team | Changed | request/response 필드 및 에러 코드 고정 |
 | v1.0.0 | 2026-03-27 | Team | Added | 초기 계약서 작성 |
 ---
@@ -37,8 +38,11 @@
 | `region` | String | Yes | 1~30자 | 중심 지역명 | `"성수"` |
 | `timeslots` | Array[String] | Yes | 최소 2개, 중복 불가, enum 제한 | 방문 슬롯 목록 | `["lunch","cafe","dinner"]` |
 | `preferred_ambience` | Array[String] | Yes | 1~4개, enum 제한 | 선호 분위기 | `["cozy","quiet"]` |
-| `food_type` | Array[String] | No | 0~5개 | 선호 음식 카테고리 | `["한식","일식"]` |
 | `budget_level` | String | Yes | `low \| normal \| high` | 예산 수준 | `"normal"` |
+| `companion` | String | Yes | `ALONE \| COUPLE \| FRIENDS` | 오늘 동행 유형 | `"ALONE"` |
+| `activity` | String | Yes | `CAFE \| ACTIVITY \| SHOPPING` | 오늘 활동 성향 | `"CAFE"` |
+| `allergies` | Array[String] | No | 0~4개, 중복 불가 | 고정 알러지 프로필 | `["PEANUT"]` |
+| `vegan` | Boolean | Yes | true/false | 고정 비건 여부 | `false` |
 
 > `user_id`는 Request Body에서 받지 않는다.  
 > 사용자 식별은 `route-service`가 JWT에서 추출하여 내부 컨텍스트로만 사용한다.
@@ -50,6 +54,15 @@
 
 #### `preferred_ambience`
 - `quiet`, `lively`, `cozy`, `work_friendly`
+
+#### `companion`
+- `ALONE`, `COUPLE`, `FRIENDS`
+
+#### `activity`
+- `CAFE`, `ACTIVITY`, `SHOPPING`
+
+#### `allergies`
+- `PEANUT`, `SHELLFISH`, `DAIRY`, `NONE`
 
 ---
 
@@ -99,8 +112,11 @@
   "region": "성수",
   "timeslots": ["lunch", "cafe", "activity", "dinner"],
   "preferred_ambience": ["cozy", "quiet"],
-  "food_type": ["양식"],
-  "budget_level": "normal"
+  "budget_level": "normal",
+  "companion": "ALONE",
+  "activity": "CAFE",
+  "allergies": ["NONE"],
+  "vegan": false
 }
 ```
 ### 4.2 Success Example (200)
@@ -145,6 +161,7 @@
 - `timeslots`는 중복 불가, 최소 2개
 - `preferred_ambience`는 최소 1개, 최대 4개
 - `budget_level`은 `low/normal/high`만 허용
+- `allergies`는 중복 불가, `NONE`은 단독으로만 허용
 - `X-Correlation-ID` 누락 시 `422` 반환
 - JSON body 누락/형식 오류 시 `422` 반환
 ---
@@ -169,6 +186,7 @@
 - `fallback_used=true`는 아래 경우 발생할 수 있다:
   - Retrieve 결과가 비어 있음
   - Feasibility 적용 후 후보가 0개
+  - 알러지/비건 필터 적용 후 후보가 0개
   - Score 적용 후 선택 가능한 후보가 0개
   - 외부 의존성 오류/타임아웃
   - Slot ordering rule: `plan`은 요청 `timeslots`의 순서를 그대로 따른다.

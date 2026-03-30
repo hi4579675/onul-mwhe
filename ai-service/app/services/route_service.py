@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 
-from app.models.schemas import AmbienceTag, PlanItem, RouteGenerateRequest,RouteGenerateSuccessResponse,TimeSlot 
-from app.models.schemas import TimeSlot
+from app.models.schemas import AmbienceTag, PlanItem, RouteGenerateRequest, RouteGenerateSuccessResponse, TimeSlot
+from app.services.dietary_filter_service import DietaryFilterService
 from app.services.feasibility_service import FeasibilityService
 from app.services.retrieve_service import RetrieveService
 from app.services.score_service import ScoreService, ScoredCandidate
@@ -14,6 +14,7 @@ class RouteService:
     def __init__(self) -> None:
         self.retrieve_service = RetrieveService()
         self.feasibility_service = FeasibilityService()
+        self.dietary_filter_service = DietaryFilterService()
         self.score_service = ScoreService()
 
     async def generate(self, body: RouteGenerateRequest, correlation_id: str) -> RouteGenerateSuccessResponse:
@@ -31,8 +32,22 @@ class RouteService:
                 correlation_id=correlation_id,
             )
             
-         # 3. 점수화
-        scored = self.score_service.score(feasible, body.preferred_ambience)
+        # 3. 알러지/비건 필터 적용
+        dietary_filtered = self.dietary_filter_service.apply(
+            feasible,
+            body.allergies,
+            body.vegan,
+        )
+        if not dietary_filtered:
+            return RouteGenerateSuccessResponse(
+                plan=[],
+                fallback_used=True,
+                unknown_count=0,
+                correlation_id=correlation_id,
+            )
+
+         # 4. 점수화
+        scored = self.score_service.score(dietary_filtered, body.preferred_ambience)
         if not scored:
             return RouteGenerateSuccessResponse(
                 plan=[],
@@ -41,7 +56,7 @@ class RouteService:
                 correlation_id=correlation_id,
             )
             
-        # 4. 슬롯 기준 버킷 구성 + 슬롯 내부 점수 내림차순 정렬
+        # 5. 슬롯 기준 버킷 구성 + 슬롯 내부 점수 내림차순 정렬
         by_slot: dict[TimeSlot, list[ScoredCandidate]] = {}
         for item in scored:
             by_slot.setdefault(item.candidate.slot, []).append(item)

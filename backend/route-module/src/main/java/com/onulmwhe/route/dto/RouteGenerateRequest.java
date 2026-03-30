@@ -11,10 +11,16 @@ public record RouteGenerateRequest(
     List<TimeSlot> timeslots,
     @JsonProperty("preferred_ambience")
     List<Ambience> preferredAmbience,
-    @JsonProperty("food_type")
-    List<String> foodType,
     @JsonProperty("budget_level")
-    BudgetLevel budgetLevel
+    BudgetLevel budgetLevel,
+    @JsonProperty("companion")
+    Companion companion,
+    @JsonProperty("activity")
+    Activity activity,
+    @JsonProperty("allergies")
+    List<Allergy> allergies,
+    @JsonProperty("vegan")
+    boolean vegan
 ) {
         public enum TimeSlot {
             breakfast, lunch, cafe, activity, dinner, dessert
@@ -24,5 +30,14 @@ public record RouteGenerateRequest(
         }
         public enum BudgetLevel {
             low, normal, high
+        }
+        public enum Companion {
+            ALONE, COUPLE, FRIENDS
+        }
+        public enum Activity {
+            CAFE, ACTIVITY, SHOPPING
+        }
+        public enum Allergy {
+            PEANUT, SHELLFISH, DAIRY, NONE
         }
     }

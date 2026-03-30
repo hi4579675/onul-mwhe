@@ -16,8 +16,11 @@ def _valid_payload() -> dict:
         "region": "성수",
         "timeslots": ["lunch", "cafe", "dinner"],
         "preferred_ambience": ["cozy", "quiet"],
-        "food_type": ["한식"],
         "budget_level": "normal",
+        "companion": "ALONE",
+        "activity": "CAFE",
+        "allergies": ["NONE"],
+        "vegan": False,
     }
 
 

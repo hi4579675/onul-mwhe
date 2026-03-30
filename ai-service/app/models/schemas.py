@@ -29,6 +29,24 @@ class BudgetLevel(str, Enum):
     normal = "normal"
     high = "high"
 
+class CompanionType(str, Enum):
+    ALONE = "ALONE"
+    COUPLE = "COUPLE"
+    FRIENDS = "FRIENDS"
+
+
+class ActivityType(str, Enum):
+    CAFE = "CAFE"
+    ACTIVITY = "ACTIVITY"
+    SHOPPING = "SHOPPING"
+
+
+class AllergyType(str, Enum):
+    PEANUT = "PEANUT"
+    SHELLFISH = "SHELLFISH"
+    DAIRY = "DAIRY"
+    NONE = "NONE"
+
 
 class AmbienceTag(str, Enum):
     quiet = "quiet"
@@ -56,8 +74,11 @@ class RouteGenerateRequest(BaseModel):
     region: Annotated[str, Field(min_length=1, max_length=30)]
     timeslots: Annotated[list[TimeSlot], Field(min_length=2)]
     preferred_ambience: Annotated[list[Ambience], Field(min_length=1, max_length=4)]
-    food_type: Annotated[list[str], Field(default_factory=list, max_length=5)]
     budget_level: BudgetLevel
+    companion: CompanionType
+    activity: ActivityType
+    allergies: Annotated[list[AllergyType], Field(default_factory=list, max_length=4)]
+    vegan: bool = False
 
     # field_validator: "데이터가 들어온 직후" 실행되는 자동 검사기
     @field_validator("timeslots")
@@ -68,12 +89,13 @@ class RouteGenerateRequest(BaseModel):
             raise ValueError("timeslots must not contain duplicates")
         return v
 
-    @field_validator("food_type")
+    @field_validator("allergies")
     @classmethod
-    def validate_food_type_non_blank(cls, v: list[str]) -> list[str]:
-        for item in v:
-            if not item or not item.strip():
-                raise ValueError("food_type must not contain blank values")
+    def validate_allergies(cls, v: list[AllergyType]) -> list[AllergyType]:
+        if len(set(v)) != len(v):
+            raise ValueError("allergies must not contain duplicates")
+        if AllergyType.NONE in v and len(v) > 1:
+            raise ValueError("allergies=NONE cannot be combined with other values")
         return v
 
 

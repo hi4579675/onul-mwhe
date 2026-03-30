@@ -13,8 +13,11 @@ def _req(timeslots: list[TimeSlot]) -> RouteGenerateRequest:
         region="성수",
         timeslots=timeslots,
         preferred_ambience=[Ambience.cozy],
-        food_type=[],
         budget_level="normal",
+        companion="ALONE",
+        activity="CAFE",
+        allergies=["NONE"],
+        vegan=False,
     )
 
 

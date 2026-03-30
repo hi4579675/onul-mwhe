@@ -146,3 +146,31 @@
 
 - **비고**
   - 장애 유형 로그 분류 필드(timeout/network/http_4xx/http_5xx/circuit_open) 적용
+
+
+## 2026-03-30 (route-service 저장/조회 E2E)
+
+- **환경**
+  - Service: `backend (app-module + route-module)`, `ai-service`
+  - Runtime: `docker-compose.e2e.yml`
+  - DB: PostgreSQL (Flyway 적용)
+  - Command:
+    - `docker compose -f docker-compose.e2e.yml up -d --build`
+    - Postman/PowerShell로 API 호출 검증
+
+- **테스트 항목**
+  - [x] `POST /api/v1/routes/generate` 응답 200
+  - [x] generate 응답 DB 저장 (`routes`) 확인
+  - [x] `GET /api/v1/routes/history` 조회 정상
+  - [x] `X-Correlation-ID` 전파(응답/로그) 확인
+
+- **결과**
+  - Passed:
+    - generate -> save -> history 시나리오 정상 동작
+    - 사용자(`X-User-Id`) 기준 이력 조회 정상
+  - Failed:
+    - 없음
+
+- **비고**
+  - 초기에는 ai-service 환경변수(`KAKAO_REST_API_KEY`) 미주입으로 기동 실패가 있었고, compose env 주입 후 정상화함.
+  - 콘솔(cmd)에서 `Invoke-RestMethod` 실행 이슈가 있어 PowerShell/Postman 기반으로 검증함.

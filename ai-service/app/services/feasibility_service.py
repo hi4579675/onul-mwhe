@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import atan2, cos, radians, sin, sqrt
-from turtle import stamp
 from typing import Any
 
 from app.models.schemas import TimeSlot

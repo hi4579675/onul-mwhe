@@ -22,6 +22,9 @@
 - retrieve cache hit/miss 단위 테스트 추가
 - score confidence 분리 검증 테스트 추가
 
+- route-service에 `generate` 응답 저장(`routes` 테이블) 및 `GET /api/v1/routes/history` 최소 조회 API를 추가했다.
+- Flyway 기반 초기 스키마(`V1__create_routes_table.sql`)를 도입해 `ddl-auto: validate` 환경에서도 저장/조회 경로를 안정화했다.
+
 
 
 ### Changed
@@ -35,6 +38,9 @@
 - Kakao 외부 호출에 retry(최대 2회, 지수 백오프)와 circuit breaker를 적용해 장애 전파를 완화함.
 - Kakao 호출 실패 로그를 timeout/network/http_4xx/http_5xx/circuit_open 분류 필드로 표준화함.
 - 외부 API 복원력 설정값(retry/cb/timeout)을 환경설정으로 분리해 운영 튜닝 가능성을 높임.
+
+- route generate/history 경로에서 `X-Correlation-ID`를 응답 헤더와 서비스 로그에 일관 전파하도록 정리했다.
+- Phase 1 사용자 식별은 JWT 대신 `X-User-Id` 헤더 기반으로 임시 운영하도록 명시했다.
 
 ### Fixed
 - 테스트 실행 경로/모듈 import 이슈를 정리하고 회귀 테스트를 보강했다.

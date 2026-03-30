@@ -8,6 +8,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
 
+
     group = 'com.onulmwhe'
     version = '0.0.1-SNAPSHOT'
 
@@ -37,5 +38,8 @@ subprojects {
 
     test {
         useJUnitPlatform()
+    }
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs << '-parameters'   // 이 줄 추가
     }
 }

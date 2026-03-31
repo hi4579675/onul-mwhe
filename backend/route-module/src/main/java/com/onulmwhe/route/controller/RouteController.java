@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class RouteController {
 
     private static final String CORRELATION_HEADER = "X-Correlation-ID";
-    private static final String USER_ID_HEADER = "X-User-Id";
+
 
     private final RouteGenerationService routeGenerationService;
 
@@ -24,12 +25,12 @@ public class RouteController {
     public ResponseEntity<RouteGenerateResponse> generate(
         @RequestBody RouteGenerateRequest request,
         @RequestHeader(value = CORRELATION_HEADER, required = false) String correlationId,
-        @RequestHeader(value = USER_ID_HEADER) String userId
+        // JwtAuthenticationFilter가 SecurityContext에 설정한 principal(userId)을 주입.
+        // principal 타입이 String이므로 @AuthenticationPrincipal String으로 직접 바인딩 가능.
+        @AuthenticationPrincipal String userId
     ) {
         String cid = resolveCorrelationId(correlationId);
-
         RouteGenerateResponse response = routeGenerationService.generate(request, userId, cid);
-
         return ResponseEntity.ok()
             .header(CORRELATION_HEADER, cid)
             .body(response);
@@ -37,14 +38,12 @@ public class RouteController {
 
     @GetMapping("/history")
     public ResponseEntity<List<RouteHistoryItemResponse>> history(
-        @RequestHeader(value = USER_ID_HEADER) String userId,
+        @AuthenticationPrincipal String userId,
         @RequestParam(defaultValue = "20") int limit,
         @RequestHeader(value = CORRELATION_HEADER, required = false) String correlationId
     ) {
         String cid = resolveCorrelationId(correlationId);
-
         List<RouteHistoryItemResponse> response = routeGenerationService.history(userId, limit, cid);
-
         return ResponseEntity.ok()
             .header(CORRELATION_HEADER, cid)
             .body(response);

@@ -6,27 +6,21 @@ import com.onulmwhe.route.service.FavoritePlaceService;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/places/favorites")
 @AllArgsConstructor
 public class FavoritePlaceController {
 
-    private static final String USER_ID_HEADER = "X-User-Id";
+    // X-User-Id 헤더 제거: JWT SecurityContext에서 userId 추출.
 
     private final FavoritePlaceService favoritePlaceService;
 
     @PostMapping
     public ResponseEntity<FavoritePlaceResponse> create(
-        @RequestHeader(value = USER_ID_HEADER) String userId,
+        @AuthenticationPrincipal String userId,
         @RequestBody FavoritePlaceRequest request
     ) {
         return ResponseEntity.ok(favoritePlaceService.create(userId, request));
@@ -34,14 +28,14 @@ public class FavoritePlaceController {
 
     @GetMapping
     public ResponseEntity<List<FavoritePlaceResponse>> list(
-        @RequestHeader(value = USER_ID_HEADER) String userId
+        @AuthenticationPrincipal String userId
     ) {
         return ResponseEntity.ok(favoritePlaceService.list(userId));
     }
 
     @DeleteMapping("/{placeId}")
     public ResponseEntity<Void> delete(
-        @RequestHeader(value = USER_ID_HEADER) String userId,
+        @AuthenticationPrincipal String userId,
         @PathVariable String placeId
     ) {
         favoritePlaceService.delete(userId, placeId);
